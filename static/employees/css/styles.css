@@ -1,0 +1,45 @@
+/* Custom styles */
+body {
+    background-color: #f8f9fa;
+}
+
+.sidebar {
+    background-color: #343a40;
+    color: white;
+}
+
+.sidebar .list-group-item {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .list-group-item:hover, 
+.sidebar .list-group-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.main-content {
+    background-color: white;
+    min-height: calc(100vh - 56px);
+    padding: 20px;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.form-field-item {
+    transition: all 0.3s ease;
+}
+
+.form-field-item:hover {
+    background-color: #e9ecef;
+}
+
+.sortable-ghost {
+    opacity: 0.5;
+    background: #c8ebfb;
+}

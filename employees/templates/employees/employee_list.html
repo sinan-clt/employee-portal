@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4" style="margin-top: 80px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Employee Records</h1>
+    </div>
+
+    <!-- Filter and Search Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label for="templateFilter" class="form-label">Filter by Form</label>
+                    <select class="form-select" id="templateFilter" name="template">
+                        <option value="all">All Forms</option>
+                        {% for template in templates %}
+                        <option value="{{ template.id }}">{{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label for="searchInput" class="form-label">Search</label>
+                    <div class="input-group">
+                        <input type="search" class="form-control" id="searchInput" 
+                               placeholder="Search employees..." name="search">
+                        <button class="btn btn-primary" type="button" id="searchButton">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" id="resetButton">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Records Card -->
+    <div class="card">
+        <div class="card-body">
+            <div id="loadingIndicator" style="display: none; text-align: center; padding: 20px;">
+                <i class="bi bi-arrow-clockwise fs-1 spinner"></i>
+                <p>Loading employees...</p>
+            </div>
+            
+            <div id="employeeTableContent">
+                {% if employees %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Form Name</th>
+                                <th>Fields</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                            <tr>
+                                <td>{{ employee.id }}</td>
+                                <td>
+                                    <a href="{% url 'employee_detail' employee.id %}" class="text-primary">
+                                        {{ employee.form_template.name }}
+                                    </a>
+                                </td>
+                                <td>{{ employee.data.count }} fields</td>
+                                <td>{{ employee.created_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'employee_detail' employee.id %}" class="btn btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'employee_delete' employee.id %}" class="btn btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-4">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if template_filter %}&template={{ template_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                &laquo; First
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if template_filter %}&template={{ template_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Previous
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if template_filter %}&template={{ template_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Next
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if template_filter %}&template={{ template_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">
+                                Last &raquo;
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-people" style="font-size: 3rem; color: #6c757d;"></i>
+                    <h5 class="mt-3">No employee records found</h5>
+                    <p class="text-muted">
+                        {% if template_filter or search_query %}
+                            Try adjusting your search or filter criteria
+                        {% else %}
+                            Create your first employee record to get started
+                        {% endif %}
+                    </p>
+                    {% if templates.exists %}
+                    <a href="{% url 'employee_create' templates.first.id %}" class="btn btn-primary mt-3">
+                        <i class="bi bi-plus-circle"></i> Add Employee
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+    .form-select:focus, .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .highlight {
+        background-color: #ffc107;
+        padding: 2px 4px;
+        border-radius: 3px;
+    }
+    .spinner {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTemplate = urlParams.get('template') || 'all';
+    const initialSearch = urlParams.get('search') || '';
+    
+    $('#templateFilter').val(initialTemplate);
+    $('#searchInput').val(initialSearch);
+
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(context, args);
+            }, wait);
+        };
+    }
+
+    // Function to load employee data via AJAX
+    function loadEmployees() {
+        const templateFilter = $('#templateFilter').val();
+        const searchQuery = $('#searchInput').val().trim();
+        
+        $('#loadingIndicator').show();
+        $('#employeeTableContent').hide();
+
+        const newUrl = new URL(window.location.href);
+        if (templateFilter && templateFilter !== 'all') {
+            newUrl.searchParams.set('template', templateFilter);
+        } else {
+            newUrl.searchParams.delete('template');
+        }
+        if (searchQuery) {
+            newUrl.searchParams.set('search', searchQuery);
+        } else {
+            newUrl.searchParams.delete('search');
+        }
+        window.history.pushState({}, '', newUrl);
+
+        $.ajax({
+            url: window.location.pathname,
+            data: {
+                'template': templateFilter,
+                'search': searchQuery
+            },
+            success: function(data) {
+                const $response = $(data);
+                const newContent = $response.find('#employeeTableContent').html();
+                $('#employeeTableContent').html(newContent).show();
+                highlightSearchResults(searchQuery);
+            },
+            complete: function() {
+                $('#loadingIndicator').hide();
+            }
+        });
+    }
+
+    // Function to highlight search results
+    function highlightSearchResults(searchQuery) {
+        if (searchQuery) {
+            const regex = new RegExp(searchQuery, 'gi');
+            $('td').each(function() {
+                const text = $(this).text();
+                if (text.match(regex)) {
+                    $(this).html(
+                        text.replace(regex, match => `<span class="highlight">${match}</span>`)
+                    );
+                }
+            });
+        }
+    }
+
+    // Event handlers
+    $('#templateFilter').change(debounce(loadEmployees, 300));
+    $('#searchInput').keyup(debounce(loadEmployees, 500));
+    $('#searchButton').click(loadEmployees);
+    $('#resetButton').click(function() {
+        $('#templateFilter').val('all');
+        $('#searchInput').val('');
+        loadEmployees();
+    });
+
+    window.onpopstate = function() {
+        loadEmployees();
+    };
+});
+</script>
+{% endblock %}

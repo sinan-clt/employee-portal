@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4" style="margin-top: 80px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Recent Activity</h1>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Forms</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_forms %}
+                    <div class="list-group">
+                        {% for form in recent_forms %}
+                        <a href="{% url 'form_design_edit' form.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ form.name }}</h6>
+                                <small>{{ form.created_at|timesince }} ago</small>
+                            </div>
+                            <small>{{ form.fields.count }} fields</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-file-earmark-text" style="font-size: 2rem; color: #6c757d;"></i>
+                        <p class="mt-2">No recent form activity</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Recent Employees</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_employees %}
+                    <div class="list-group">
+                        {% for employee in recent_employees %}
+                        <a href="{% url 'employee_detail' employee.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Employee #{{ employee.id }}</h6>
+                                <small>{{ employee.created_at|timesince }} ago</small>
+                            </div>
+                            <small>{{ employee.form_template.name }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-people" style="font-size: 2rem; color: #6c757d;"></i>
+                        <p class="mt-2">No recent employee activity</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
